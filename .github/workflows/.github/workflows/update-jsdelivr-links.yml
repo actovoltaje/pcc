@@ -1,0 +1,34 @@
+name: Update jsDelivr Links
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-links:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Generate jsDelivr URLs
+        run: |
+          echo "# jsDelivr URLs" > URLS.md
+          echo "" >> URLS.md
+          git ls-files | grep -E '\.(js|css|png|jpg)$' | while read file; do
+            echo "https://cdn.jsdelivr.net/gh/${GITHUB_REPOSITORY}@main/${file}" >> URLS.md
+          done
+
+      - name: Commit URLS.md
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add URLS.md
+          git commit -m "Update jsDelivr URLs" -a || echo "No changes to commit"
+          git push
