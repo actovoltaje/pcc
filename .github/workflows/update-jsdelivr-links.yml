@@ -1,0 +1,33 @@
+name: Update jsDelivr Links
+
+on:
+  push:
+    branches:
+      - main # Asegúrate de que esta sea tu rama de trabajo principal
+
+jobs:
+  update-links:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    # Enumera todos los archivos estáticos y genera las URLs de jsDelivr
+    - name: Generate jsDelivr URLs
+      run: |
+        echo "# jsDelivr URLs" > URLS.md
+        for file in $(git ls-files | grep -E '\.(js|css|png|jpg)$'); do
+          echo "https://cdn.jsdelivr.net/gh/${GITHUB_REPOSITORY}@main/${file}" >> URLS.md
+        done
+
+    # Configura Git para el commit
+    - name: Configura Git
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+    # Comprueba si hay cambios. Si los hay, hace commit y push.
+    - name: Commit and push if changed
+      run: |
+        git add URLS.md
+        git diff --staged --quiet || (git commit -m "Actualizar URLs de jsDelivr" && git push)
